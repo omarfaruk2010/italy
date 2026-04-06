@@ -205,19 +205,19 @@ button{
 </tr>
 
 <tr>
-<td colspan="2">1. Surname<br>
+<td colspan="2">1. Surname (Last name)<br>
 <input type="text" name="lname">
 </td>
 </tr>
 
 <tr>
-<td colspan="2">2. Surname at birth (if different)<br>
+<td colspan="2">2. Surname at birth (Mid name) (if different)<br>
 <input type="text" name="surname_birth">
 </td>
 </tr>
 
 <tr>
-<td colspan="2">3. First name(s) (given name(s))<br>
+<td colspan="2">3. First name (given name)<br>
 <input type="text" name="fname">
 </td>
 </tr>
@@ -226,7 +226,7 @@ button{
 <td>4. Date of birth (day/month/year)<br>
 <input type="text" name="dob"></td>
 
-<td>7. Current nationality<br>
+<td>5. Current nationality<br>
 <input type="text" name="nationality"></td>
 </tr>
 
@@ -236,10 +236,10 @@ button{
 </tr>
 
 <tr>
-<td>5. Place of birth<br>
+<td>6. Place of birth<br>
 <input type="text" name="birthplace"></td>
 
-<td>6. Country of birth<br>
+<td>7. Country of birth<br>
 <input type="text" name="birthcountry"></td>
 </tr>
 
@@ -286,7 +286,7 @@ button{
 </tr>
 
 <tr>
-<td colspan="2">13. Number of travel document<br>
+<td colspan="2">13. Passport Number<br>
 <input type="text" name="passport"></td>
 </tr>
 
@@ -306,13 +306,20 @@ button{
 <tr>
 <td colspan="2">17. Home address and e-mail<br>
 <input type="text" name="address">
-<input type="email" name="email" style="margin-top:6px;">
-<div style="margin-top:6px;">Phone<br>
+</tr>
+
+<tr>
+<td colspan="2"> Email<br>
+<input type="text" name="address">
+</tr>
+
+<tr>
+<td colspan="2">18. Phone Number<br>
 <input type="text" name="phone"></div></td>
 </tr>
 
 <tr>
-<td colspan="2">18. Residence in a country other than the country of current nationality<br>
+<td colspan="2">19. Residence in a country other than the country of current nationality<br>
 <div class="cb-row">
 <label><input type="radio" name="residence_other" value="No" checked> No</label>
 <label><input type="radio" name="residence_other" value="Yes"> Yes</label>
@@ -320,17 +327,17 @@ button{
 </tr>
 
 <tr>
-<td colspan="2">19. Current occupation<br>
+<td colspan="2">20. Current occupation<br>
 <input type="text" name="occupation"></td>
 </tr>
 
 <tr>
-<td colspan="2">20. Employer (for students: school name and address)<br>
+<td colspan="2">21. Employer (for students: school name and address)<br>
 <input type="text" name="university"></td>
 </tr>
 
 <tr>
-<td colspan="2">21. Main purpose(s) of the journey<br>
+<td colspan="2">22. Main purpose(s) of the journey<br>
 <div class="cb-row">
 <label><input type="checkbox" name="purpose_tourism"> Tourism</label>
 <label><input type="checkbox" name="purpose_business"> Business</label>
@@ -338,7 +345,7 @@ button{
 <label><input type="checkbox" name="purpose_cultural"> Cultural</label>
 <label><input type="checkbox" name="purpose_conference"> Conference</label>
 <label><input type="checkbox" name="purpose_medical"> Medical</label>
-<label><input type="checkbox" name="purpose_study" checked> Study</label>
+<label><input type="checkbox" name="purpose_study" > Study</label>
 <label><input type="checkbox" name="purpose_transit"> Transit</label>
 <label><input type="checkbox" name="purpose_other"> Other</label>
 </div></td>
@@ -346,7 +353,7 @@ button{
 
 <!-- TRAVEL -->
 <tr>
-<td colspan="2"><b>Travel Details</b></td>
+<td colspan="2"><b>23. Travel Details (Tourism)</b></td>
 </tr>
 
 <tr>
@@ -394,7 +401,7 @@ button{
 
 <!-- EU FAMILY (34-35) -->
 <tr>
-<td colspan="2">34. Personal data of the family member who is an EU, EEA or CH citizen<br>
+<td colspan="2">24. Personal data of the family member who is an EU, EEA or CH citizen (Visit family, Medical & Study )<br>
 <table style="width:100%; margin-top:6px;">
 <tr>
 <td style="border:1px solid black;">Surname<br><input type="text" name="eu_family_surname"></td>
@@ -409,7 +416,7 @@ button{
 </tr>
 
 <tr>
-<td colspan="2">35. Family relationship with an EU, EEA or CH citizen<br>
+<td colspan="2">25. Family relationship with an EU, EEA or CH citizen (Visit family, Medical & Study )<br>
 <div class="cb-row">
 <label><input type="checkbox" name="rel_spouse"> Spouse</label>
 <label><input type="checkbox" name="rel_child"> Son / daughter</label>
@@ -419,20 +426,23 @@ button{
 </tr>
 
 <tr>
-<td>36. Place and date<br>
+<td>26. Place and date<br>
 <input type="text" name="place">
 <input type="date" name="sign_date" style="margin-top:6px;"></td>
 
-<td>37. Signature (for minors: parent / legal guardian)<br>
+<td>27. Signature (for minors: parent / legal guardian)<br>
 <input type="text" name="signature"></td>
 </tr>
 
 <tr>
 <td colspan="2">
-<b>Visa fee — payment</b><br>
+<b>Application fee — 15.eu payment</b><br>
 <span style="font-size:12px;">Use the link below to pay the fee, then enter your transaction or reference number for verification.</span><br><br>
-<a id="paymentPageLink" href="#" target="_blank" rel="noopener noreferrer">Open payment page</a><br><br>
-Payment transaction / reference number <span style="font-size:12px;">(receipt / bank ref.)</span><br>
+<a id="paymentPageLink" href="#" target="_blank" rel="noopener noreferrerএখানে লিংক বসাতে হবে">Open payment page</a><br><br>
+</tr>
+
+<tr>
+<td colspan="2">28. Payment transaction / reference number <span style="font-size:12px;">(receipt / bank ref.)</span><br>
 <input type="text" name="payment_transaction_id" autocomplete="off">
 </td>
 </tr>
@@ -493,7 +503,7 @@ function apiUrl(file) {
 }
 
 /* Paste your payment/checkout page URL here (leave "" until ready). */
-var PAYMENT_CHECKOUT_URL = "";
+var PAYMENT_CHECKOUT_URL = "https://www.";
 
 (function(){
   var payLink = document.getElementById("paymentPageLink");
