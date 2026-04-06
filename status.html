@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Check Status</h2>
+
+<input id="id" placeholder="Tracking ID">
+<button onclick="check()">Check</button>
+
+<p id="result"></p>
+
+<script>
+async function check(){
+let id = document.getElementById("id").value;
+
+let res = await fetch("http://localhost:3000/status/"+id);
+let data = await res.json();
+
+if(!data.found){
+document.getElementById("result").innerText = "Not Found";
+}else{
+document.getElementById("result").innerText = "Status: " + data.status;
+}
+}
+</script>
+
+</body>
+</html>

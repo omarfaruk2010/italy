@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin</title>
+<style>
+body { font-family: Arial, sans-serif; padding: 16px; }
+.card { border: 1px solid #000; margin: 10px 0; padding: 12px; max-width: 720px; }
+button { margin-right: 8px; margin-top: 8px; padding: 8px 14px; cursor: pointer; }
+.card-photo { margin-top: 8px; }
+.card-photo img { max-height: 180px; max-width: 100%; border: 1px solid #000; display: block; margin-top: 4px; object-fit: contain; }
+.photo-missing { color: #666; font-size: 13px; }
+.status-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  margin: 6px 0 10px 0;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: 2px solid #333;
+}
+.status-badge.pending { background: #fff3cd; color: #664d03; border-color: #856404; }
+.status-badge.approved { background: #d4edda; color: #155724; border-color: #28a745; }
+.status-badge.rejected { background: #f8d7da; color: #721c24; border-color: #dc3545; }
+.status-badge.other { background: #e2e3e5; color: #383d41; border-color: #6c757d; }
+</style>
+</head>
+
+<body>
+
+<h2>Admin Panel</h2>
+<p>Update status by <strong>Application ID</strong>. List refreshes every 3 seconds.</p>
+<div id="list"></div>
+
+<script>
+function apiUrl(file) {
+  if (typeof window.APP_API_BASE === "string" && window.APP_API_BASE.length) {
+    return window.APP_API_BASE.replace(/\/?$/, "/") + String(file).replace(/^\//, "");
+  }
+  return new URL(file, window.location.href.split("#")[0]).href;
+}
+
+function esc(s) {
+  if (s == null || s === undefined) return "";
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function displayName(d) {
+  var n = (d.lname || "") + " " + (d.fname || "");
+  n = n.trim();
+  if (n) return n;
+  return d.name || "—";
+}
+
+function appId(d) {
+  return d.id || d.appID || "—";
+}
+
+/** Newest applications first (by date + time; missing dates last). */
+function rowTimestamp(d) {
+  var datePart = d.date || "";
+  var timePart = d.time || "00:00:00";
+  if (!datePart) {
+    var aid = String(d.appID || "");
+    var m = aid.match(/^APP-(\d+)$/);
+    if (m) {
+      var sec = parseInt(m[1], 10) * 1000;
+      if (!isNaN(sec)) return sec;
+    }
+    return 0;
+  }
+  var t = Date.parse(datePart + "T" + timePart);
+  return isNaN(t) ? 0 : t;
+}
+
+function sortNewestFirst(arr) {
+  return arr.slice().sort(function (a, b) {
+    return rowTimestamp(b) - rowTimestamp(a);
+  });
+}
+
+function statusBadgeHtml(raw) {
+  var s = raw;
+  if (s == null || s === "") s = "pending";
+  s = String(s).trim();
+  if (s === "") s = "pending";
+  var low = s.toLowerCase();
+  var cls = "other";
+  if (low === "pending") cls = "pending";
+  else if (low === "approved") cls = "approved";
+  else if (low === "rejected") cls = "rejected";
+  return (
+    "<div><strong>Status</strong></div>" +
+    "<div class=\"status-badge " +
+    cls +
+    "\">" +
+    esc(s.toUpperCase()) +
+    "</div>"
+  );
+}
+
+/** Turn stored path into a safe relative URL for <img src> */
+function normalizePhotoPath(path) {
+  if (!path || typeof path !== "string") return "";
+  var p = path.replace(/\\/g, "/").trim();
+  if (p.indexOf("..") !== -1) return "";
+  var low = p.toLowerCase();
+  if (low.indexOf("javascript:") === 0 || low.indexOf("data:") === 0) return "";
+  // Full Windows path: keep only from "uploads/" onward
+  var u = low.indexOf("uploads/");
+  if (u > 0) {
+    p = p.slice(u);
+  }
+  if (p.charAt(0) === "/") {
+    p = p.replace(/^\/+/, "");
+  }
+  return p;
+}
+
+function photoBlock(d) {
+  var raw = d.applicant_photo || d.photo || "";
+  var path = normalizePhotoPath(raw);
+  if (!path) {
+    return "<div class='card-photo'><b>Photo:</b> <span class='photo-missing'>No photo on file</span></div>";
+  }
+  var src = path.split("#")[0].split("?")[0];
+  var safe = esc(src);
+  return (
+    "<div class='card-photo'><b>Photo:</b><br>" +
+    "<img src=\"" + safe + "\" alt=\"Applicant\" loading=\"lazy\" " +
+    "onerror=\"var p=this.parentNode;this.remove();var m=document.createElement('span');m.className='photo-missing';m.innerHTML='Image failed to load. Ensure <code>uploads/</code> is in the same folder as admin.html on the server (e.g. <code>/italy/uploads/</code>).';p.appendChild(m);\">" +
+    "</div>"
+  );
+}
+
+function load() {
+
+fetch(apiUrl("get.php"), { cache: "no-store", credentials: "same-origin" })
+.then(function (res) {
+  if (!res.ok) throw new Error("get.php HTTP " + res.status);
+  return res.text();
+})
+.then(function (text) {
+  var data;
+  try {
+    data = JSON.parse(text);
+  } catch (e) {
+    document.getElementById("list").innerHTML =
+      "<p style='color:#c00;'>Invalid data from server. Ensure <code>get.php</code> runs under PHP and <code>data.json</code> is valid JSON.</p>";
+    return;
+  }
+  if (!Array.isArray(data)) data = [];
+
+  data = sortNewestFirst(data);
+
+  var html = "";
+
+  data.forEach(function (d) {
+    var id = appId(d);
+    var rawId = d.id || d.appID || "";
+    var idAttr = rawId.replace(/'/g, "\\'");
+    var email = d.email ? esc(d.email) : "—";
+    var txn = d.payment_transaction_id ? esc(d.payment_transaction_id) : "—";
+    html +=
+      "<div class='card'>" +
+      "<b>Application ID:</b> " + esc(id) + "<br>" +
+      statusBadgeHtml(d.status) +
+      "<b>Name:</b> " + esc(displayName(d)) + "<br>" +
+      "<b>Email:</b> " + email + "<br>" +
+      "<b>Passport:</b> " + esc(d.passport || "—") + "<br>" +
+      "<b>Payment transaction no.:</b> " + txn + "<br>" +
+      photoBlock(d) +
+      "<br><b>Date:</b> " + esc(d.date || "—") + " " + esc(d.time || "") + "<br>" +
+      "<button type='button' onclick=\"update('" + idAttr + "','approved')\">Approve</button>" +
+      "<button type='button' onclick=\"update('" + idAttr + "','rejected')\">Reject</button>" +
+      "</div>";
+  });
+
+  document.getElementById("list").innerHTML = html || "<p>No applications yet.</p>";
+})
+.catch(function () {
+  document.getElementById("list").innerHTML =
+    "<p style='color:#c00;'>Could not load applications. Open this site through PHP (same host/folder as <code>get.php</code>).</p>";
+});
+
+}
+
+function update(id, status) {
+  if (!id || id === "—") return;
+  fetch(apiUrl("update.php"), {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: "id=" + encodeURIComponent(id) + "&status=" + encodeURIComponent(status),
+    credentials: "same-origin"
+  }).then(function () { load(); });
+}
+
+load();
+setInterval(load, 3000);
+
+</script>
+
+</body>
+</html>

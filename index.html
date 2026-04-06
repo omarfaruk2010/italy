@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Italy Visa Application</title>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body{
+  font-family: Arial;
+  background:#f5f5f5;
+}
+
+.container{
+  width:900px;
+  margin:auto;
+  background:white;
+  border:2px solid black;
+}
+
+/* HEADER */
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px;
+  border-bottom:2px solid black;
+}
+
+.flag{
+  display:flex;
+  width:90px;
+  height:60px;
+}
+
+.flag div{ flex:1; }
+.green{background:#009246;}
+.white{background:#fff;border:1px solid black;}
+.red{background:#ce2b37;}
+
+.center{
+  text-align:center;
+  flex:1;
+}
+
+.photo{
+  width:130px;
+  min-height:150px;
+  border:2px solid black;
+  text-align:center;
+  font-size:11px;
+  padding:6px 4px;
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+}
+
+.photo .photo-title{
+  font-size:11px;
+  line-height:1.2;
+}
+
+.photo input[type="file"]{
+  width:100%;
+  max-width:122px;
+  font-size:9px;
+  border:none;
+  padding:0;
+}
+
+.photo-preview{
+  width:100%;
+  max-height:95px;
+  object-fit:cover;
+  object-position:center top;
+  display:none;
+  border:1px solid #ccc;
+}
+
+.photo-preview.is-visible{
+  display:block;
+}
+
+.form-body{
+  display:flex;
+  align-items:stretch;
+}
+
+.main-col{
+  flex:1;
+  min-width:0;
+}
+
+.admin-col{
+  width:220px;
+  border-left:2px solid black;
+  padding:8px;
+  font-size:11px;
+  vertical-align:top;
+  box-sizing:border-box;
+}
+
+.admin-col p{ margin:0 0 8px 0; }
+.admin-col label{ display:block; margin:2px 0; font-size:10px; }
+.admin-col input[type="checkbox"],
+.admin-col input[type="radio"]{
+  width:auto;
+}
+
+.cb-row{ margin:4px 0; font-size:12px; }
+.cb-row label{ margin-right:12px; white-space:nowrap; }
+.cb-row input{ width:auto; margin-right:4px; vertical-align:middle; }
+
+/* TABLE STYLE */
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+td{
+  border:1px solid black;
+  padding:6px;
+  font-size:13px;
+}
+
+input, select{
+  width:100%;
+  border:none;
+  outline:none;
+  box-sizing:border-box;
+}
+
+td input[type="checkbox"],
+td input[type="radio"]{
+  width:auto;
+}
+
+.legal{
+  font-size:10px;
+  text-align:justify;
+  line-height:1.35;
+}
+
+/* BUTTON */
+button{
+  width:100%;
+  padding:12px;
+  background:#007bff;
+  color:white;
+  border:none;
+  margin-top:10px;
+}
+.top-bar{
+  text-align:center;
+  padding:10px 0;
+  font-size:14px;
+}
+.top-bar a{
+  color:#007bff;
+}
+</style>
+</head>
+
+<body>
+
+<p class="top-bar"><a href="check.html">Track application status</a> — use your Application ID after you submit.</p>
+
+<div class="container">
+
+<form id="form" enctype="multipart/form-data">
+
+<!-- HEADER -->
+<div class="header">
+
+<div class="flag">
+<div class="green"></div>
+<div class="white"></div>
+<div class="red"></div>
+</div>
+
+<div class="center">
+<h3>Consulate General of Italy</h3>
+<h4>New York</h4>
+</div>
+
+<div class="photo">
+<span class="photo-title">Photograph</span>
+<input type="file" name="applicant_photo" id="photoInput" accept="image/*">
+<img id="photoPreview" class="photo-preview" alt="Applicant photo preview">
+</div>
+
+</div>
+
+<div class="form-body">
+
+<div class="main-col">
+
+<table>
+
+<tr>
+<td colspan="2" style="font-size:11px;">The answers to questions 1 to 3 must match those in your travel document.</td>
+</tr>
+
+<tr>
+<td colspan="2">1. Surname<br>
+<input type="text" name="lname">
+</td>
+</tr>
+
+<tr>
+<td colspan="2">2. Surname at birth (if different)<br>
+<input type="text" name="surname_birth">
+</td>
+</tr>
+
+<tr>
+<td colspan="2">3. First name(s) (given name(s))<br>
+<input type="text" name="fname">
+</td>
+</tr>
+
+<tr>
+<td>4. Date of birth (day/month/year)<br>
+<input type="text" name="dob"></td>
+
+<td>7. Current nationality<br>
+<input type="text" name="nationality"></td>
+</tr>
+
+<tr>
+<td colspan="2">Nationality at birth, if different<br>
+<input type="text" name="nationality_birth"></td>
+</tr>
+
+<tr>
+<td>5. Place of birth<br>
+<input type="text" name="birthplace"></td>
+
+<td>6. Country of birth<br>
+<input type="text" name="birthcountry"></td>
+</tr>
+
+<tr>
+<td>8. Sex<br>
+<div class="cb-row">
+<label><input type="radio" name="gender" value="Male"> Male</label>
+<label><input type="radio" name="gender" value="Female"> Female</label>
+</div></td>
+
+<td>9. Marital status<br>
+<div class="cb-row">
+<label><input type="radio" name="marital" value="Single"> Single</label>
+<label><input type="radio" name="marital" value="Married"> Married</label>
+<label><input type="radio" name="marital" value="Separated"> Separated</label>
+</div>
+<div class="cb-row">
+<label><input type="radio" name="marital" value="Divorced"> Divorced</label>
+<label><input type="radio" name="marital" value="Widow"> Widow(er)</label>
+<label><input type="radio" name="marital" value="Other"> Other</label>
+</div></td>
+</tr>
+
+<tr>
+<td colspan="2">10. In case of minors (parental authority, legal guardian, etc.)<br>
+<input type="text" name="minors"></td>
+</tr>
+
+<tr>
+<td colspan="2">11. National identity number, where applicable<br>
+<input type="text" name="national_id"></td>
+</tr>
+
+<tr>
+<td colspan="2">12. Type of passport or travel document<br>
+<div class="cb-row">
+<label><input type="checkbox" name="doc_ordinary" checked> Ordinary passport</label>
+<label><input type="checkbox" name="doc_diplomatic"> Diplomatic</label>
+<label><input type="checkbox" name="doc_service"> Service</label>
+<label><input type="checkbox" name="doc_official"> Official</label>
+<label><input type="checkbox" name="doc_special"> Special</label>
+<label><input type="checkbox" name="doc_other"> Other</label>
+</div></td>
+</tr>
+
+<tr>
+<td colspan="2">13. Number of travel document<br>
+<input type="text" name="passport"></td>
+</tr>
+
+<tr>
+<td>14. Date of issue<br>
+<input type="date" name="issued"></td>
+
+<td>15. Valid until<br>
+<input type="date" name="expiry"></td>
+</tr>
+
+<tr>
+<td colspan="2">16. Issued by<br>
+<input type="text" name="issued_by"></td>
+</tr>
+
+<tr>
+<td colspan="2">17. Home address and e-mail<br>
+<input type="text" name="address">
+<input type="email" name="email" style="margin-top:6px;">
+<div style="margin-top:6px;">Phone<br>
+<input type="text" name="phone"></div></td>
+</tr>
+
+<tr>
+<td colspan="2">18. Residence in a country other than the country of current nationality<br>
+<div class="cb-row">
+<label><input type="radio" name="residence_other" value="No" checked> No</label>
+<label><input type="radio" name="residence_other" value="Yes"> Yes</label>
+</div></td>
+</tr>
+
+<tr>
+<td colspan="2">19. Current occupation<br>
+<input type="text" name="occupation"></td>
+</tr>
+
+<tr>
+<td colspan="2">20. Employer (for students: school name and address)<br>
+<input type="text" name="university"></td>
+</tr>
+
+<tr>
+<td colspan="2">21. Main purpose(s) of the journey<br>
+<div class="cb-row">
+<label><input type="checkbox" name="purpose_tourism"> Tourism</label>
+<label><input type="checkbox" name="purpose_business"> Business</label>
+<label><input type="checkbox" name="purpose_family"> Visit family</label>
+<label><input type="checkbox" name="purpose_cultural"> Cultural</label>
+<label><input type="checkbox" name="purpose_conference"> Conference</label>
+<label><input type="checkbox" name="purpose_medical"> Medical</label>
+<label><input type="checkbox" name="purpose_study" checked> Study</label>
+<label><input type="checkbox" name="purpose_transit"> Transit</label>
+<label><input type="checkbox" name="purpose_other"> Other</label>
+</div></td>
+</tr>
+
+<!-- TRAVEL -->
+<tr>
+<td colspan="2"><b>Travel Details</b></td>
+</tr>
+
+<tr>
+<td>Destination<br>
+<input type="text" name="destination"></td>
+
+<td>Entries<br>
+<select name="entries">
+<option>Single</option>
+<option>Double</option>
+<option>Multiple</option>
+</select></td>
+</tr>
+
+<tr>
+<td>Arrival<br>
+<input type="date" name="arrival"></td>
+
+<td>Departure<br>
+<input type="date" name="departure"></td>
+</tr>
+
+<tr>
+<td colspan="2">Duration<br>
+<input type="number" name="duration"></td>
+</tr>
+
+<!-- HOST -->
+<tr>
+<td colspan="2"><b>Host Information</b></td>
+</tr>
+
+<tr>
+<td colspan="2">Host Name<br>
+<input type="text" name="host"></td>
+</tr>
+
+<tr>
+<td>Address<br>
+<input type="text" name="host_address"></td>
+
+<td>Phone<br>
+<input type="text" name="host_phone"></td>
+</tr>
+
+<!-- EU FAMILY (34-35) -->
+<tr>
+<td colspan="2">34. Personal data of the family member who is an EU, EEA or CH citizen<br>
+<table style="width:100%; margin-top:6px;">
+<tr>
+<td style="border:1px solid black;">Surname<br><input type="text" name="eu_family_surname"></td>
+<td style="border:1px solid black;" colspan="2">First name(s)<br><input type="text" name="eu_family_fname"></td>
+</tr>
+<tr>
+<td style="border:1px solid black;">Date of birth<br><input type="text" name="eu_family_dob"></td>
+<td style="border:1px solid black;">Nationality<br><input type="text" name="eu_family_nat"></td>
+<td style="border:1px solid black;">Travel document or ID number<br><input type="text" name="eu_family_doc"></td>
+</tr>
+</table></td>
+</tr>
+
+<tr>
+<td colspan="2">35. Family relationship with an EU, EEA or CH citizen<br>
+<div class="cb-row">
+<label><input type="checkbox" name="rel_spouse"> Spouse</label>
+<label><input type="checkbox" name="rel_child"> Son / daughter</label>
+<label><input type="checkbox" name="rel_desc"> Other direct descendants</label>
+<label><input type="checkbox" name="rel_asc"> Dependent ascendant</label>
+</div></td>
+</tr>
+
+<tr>
+<td>36. Place and date<br>
+<input type="text" name="place">
+<input type="date" name="sign_date" style="margin-top:6px;"></td>
+
+<td>37. Signature (for minors: parent / legal guardian)<br>
+<input type="text" name="signature"></td>
+</tr>
+
+<tr>
+<td colspan="2">
+<b>Visa fee — payment</b><br>
+<span style="font-size:12px;">Use the link below to pay the fee, then enter your transaction or reference number for verification.</span><br><br>
+<a id="paymentPageLink" href="#" target="_blank" rel="noopener noreferrer">Open payment page</a><br><br>
+Payment transaction / reference number <span style="font-size:12px;">(receipt / bank ref.)</span><br>
+<input type="text" name="payment_transaction_id" autocomplete="off">
+</td>
+</tr>
+
+<tr>
+<td colspan="2" class="legal" lang="it">
+Sono a conoscenza del fatto che il rifiuto del visto non dà luogo al rimborso dei diritti pagati per la trattazione della pratica.
+</td>
+</tr>
+
+<tr>
+<td colspan="2" class="legal" lang="it">
+Sono consapevole e acconsento a quanto segue: la raccolta dei dati richiesti dal presente modulo di domanda, la presentazione della mia fotografia e, ove applicabile, l'acquisizione delle impronte digitali sono obbligatori ai fini dell'esame della domanda di visto; i dati personali che mi riguardano e che figurano sul presente modulo di domanda saranno forniti alle autorità competenti e trattati dal consolato, in qualità di titolare del trattamento, al solo fine di esaminare e decidere sulla mia domanda di visto. Tali dati, nonché i dati relativi alla decisione assunta sulla mia domanda o alla decisione di annullare, revocare o estendere un visto rilasciato, saranno inseriti e conservati nel Sistema di informazione sui visti (VIS) per un periodo massimo di cinque anni, nel corso del quale saranno accessibili alle autorità per i visti e alle autorità competenti per effettuare controlli sui visti alle frontiere esterne e all'interno del proprio territorio, alle autorità per l'immigrazione e il diritto di asilo degli Stati membri e alle autorità competenti per l'esame delle domande di visto. In determinate condizioni, i dati saranno resi disponibili anche alle autorità designate degli Stati membri e a Europol, ai fini della prevenzione, individuazione e inchiesta in materia di reati di terrorismo e altri reati gravi. I miei dati potranno essere trasferiti o consultati in paesi terzi per le finalità sopra indicate, a condizione che il paese terzo in questione abbia concluso un accordo con l'Unione. Sono consapevole di avere il diritto di ottenere in qualsiasi Stato membro la comunicazione dei dati che mi riguardano registrati nel VIS e dello Stato membro che li ha trasmessi al VIS, nonché di richiedere la rettifica dei dati inesatti che mi riguardano e registrati nel VIS e la cancellazione dei dati che mi riguardano trattati illecitamente. La mia richiesta di rettifica o cancellazione sarà esaminata dallo Stato membro responsabile del trattamento dei dati. Posso rivolgere la mia richiesta all'autorità di qualsiasi Stato membro. Sono inoltre consapevole di poter impugnare qualsiasi decisione relativa alla mia domanda di visto e di poter presentare reclamo all'autorità di controllo nazionale dello Stato interessato qualora ritenga che i miei dati non siano stati trattati nel rispetto delle norme applicabili in materia di protezione dei dati. L'autorità in Italia è il Garante per la protezione dei dati personali (www.garanteprivacy.it).
+</td>
+</tr>
+
+</table>
+
+<button type="submit">Submit</button>
+
+</div>
+
+<aside class="admin-col">
+<p><strong>For official use only</strong></p>
+<p>Date of application<br><input type="text" name="admin_app_date" style="border:1px solid #ccc; width:100%;"></p>
+<p>Visa application no.<br><input type="text" name="admin_visa_no" style="border:1px solid #ccc; width:100%;"></p>
+<p>Application submitted at</p>
+<label><input type="checkbox" name="admin_embassy"> Embassy</label>
+<label><input type="checkbox" name="admin_consulate"> Consulate</label>
+<label><input type="checkbox" name="admin_center"> Common application centre</label>
+<label><input type="checkbox" name="admin_other"> Other</label>
+<p>Supporting documents</p>
+<label><input type="checkbox" name="doc_pass"> Passport</label>
+<label><input type="checkbox" name="doc_travel"> Travel document</label>
+<label><input type="checkbox" name="doc_means"> Means of subsistence</label>
+<label><input type="checkbox" name="doc_invite"> Invitation</label>
+<label><input type="checkbox" name="doc_ticket"> Ticket</label>
+<p>Visa decision</p>
+<label><input type="checkbox" name="dec_refused"> Refused</label>
+<label><input type="checkbox" name="dec_issued"> Issued</label>
+<label><input type="checkbox" name="dec_revoked"> Revoked</label>
+<label><input type="checkbox" name="dec_annulled"> Annulled</label>
+</aside>
+
+</div>
+
+</form>
+
+</div>
+
+<script>
+/* Same folder as this page — fixes /italy/ and similar. Optional: window.APP_API_BASE = "https://site.com/italy/"; */
+function apiUrl(file) {
+  if (typeof window.APP_API_BASE === "string" && window.APP_API_BASE.length) {
+    return window.APP_API_BASE.replace(/\/?$/, "/") + String(file).replace(/^\//, "");
+  }
+  return new URL(file, window.location.href.split("#")[0]).href;
+}
+
+/* Paste your payment/checkout page URL here (leave "" until ready). */
+var PAYMENT_CHECKOUT_URL = "";
+
+(function(){
+  var payLink = document.getElementById("paymentPageLink");
+  if (payLink) {
+    if (PAYMENT_CHECKOUT_URL) {
+      payLink.href = PAYMENT_CHECKOUT_URL;
+    } else {
+      payLink.addEventListener("click", function(e){
+        e.preventDefault();
+        alert("Payment link is not set yet. Edit PAYMENT_CHECKOUT_URL near the top of the script block in index.html.");
+      });
+    }
+  }
+})();
+
+(function(){
+  var input = document.getElementById("photoInput");
+  var preview = document.getElementById("photoPreview");
+  var prevUrl = null;
+  if (input && preview) {
+    input.addEventListener("change", function(){
+      if (prevUrl) {
+        URL.revokeObjectURL(prevUrl);
+        prevUrl = null;
+      }
+      var file = input.files && input.files[0];
+      if (!file || !file.type || file.type.indexOf("image/") !== 0) {
+        preview.src = "";
+        preview.classList.remove("is-visible");
+        return;
+      }
+      prevUrl = URL.createObjectURL(file);
+      preview.src = prevUrl;
+      preview.classList.add("is-visible");
+    });
+  }
+})();
+
+document.getElementById("form").addEventListener("submit", async function(e){
+  e.preventDefault();
+  var form = e.target;
+  var fd = new FormData(form);
+  try {
+    var res = await fetch(apiUrl("apply.php"), { method: "POST", body: fd, credentials: "same-origin" });
+    var text = await res.text();
+    var j;
+    try {
+      j = JSON.parse(text);
+    } catch (parseErr) {
+      throw new Error("Server did not return JSON. Use PHP (e.g. open this folder via XAMPP / php -S).");
+    }
+    if (!j.success) {
+      throw new Error(j.error || "Submit failed");
+    }
+    await Swal.fire({
+      icon: "success",
+      title: "Application submitted",
+      html:
+        "<p>Your <strong>Application ID</strong> (save this to check status):</p>" +
+        "<p style=\"font-size:1.35em;font-weight:bold;letter-spacing:2px;margin:12px 0;\">" + j.id + "</p>" +
+        "<p>Use the link at the top of the page, <strong>Track application status</strong>, and enter this ID anytime.</p>",
+      confirmButtonText: "OK"
+    });
+    form.reset();
+    var preview = document.getElementById("photoPreview");
+    var input = document.getElementById("photoInput");
+    if (preview) {
+      preview.src = "";
+      preview.classList.remove("is-visible");
+    }
+    if (input) input.value = "";
+  } catch (err) {
+    Swal.fire({ icon: "error", title: "Could not submit", text: err.message || "Unknown error" });
+  }
+});
+</script>
+
+</body>
+</html>

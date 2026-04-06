@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Track application status</title>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+body { font-family: Arial, sans-serif; max-width: 520px; margin: 40px auto; padding: 0 16px; }
+h2 { margin-top: 0; }
+.row { display: flex; gap: 8px; margin-bottom: 12px; }
+input[type="text"] { flex: 1; padding: 10px; font-size: 15px; box-sizing: border-box; }
+button { padding: 10px 18px; font-size: 15px; cursor: pointer; background: #007bff; color: #fff; border: none; }
+button:hover { background: #0069d9; }
+#result { margin-top: 20px; padding: 16px; border: 1px solid #ccc; border-radius: 4px; min-height: 24px; background: #fafafa; color: #222; }
+.status-box {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 1.15rem;
+  font-weight: bold;
+  border: 2px solid #333;
+}
+.status-pending { background: #fff3cd; color: #664d03; border-color: #856404; }
+.status-approved { background: #d4edda; color: #155724; border-color: #28a745; }
+.status-rejected { background: #f8d7da; color: #721c24; border-color: #dc3545; }
+a { color: #007bff; }
+</style>
+</head>
+<body>
+
+<p><a href="index.html">← Back to application form</a></p>
+<h2>Track application status</h2>
+<p>Enter the <strong>Application ID</strong> you received after submitting (for example <code>ITA123456</code>).</p>
+
+<div class="row">
+<input type="text" id="appId" placeholder="Application ID" autocomplete="off">
+<button type="button" onclick="check()">Check status</button>
+</div>
+
+<div id="result"></div>
+
+<!--
+  If "Check status" never works, your HTML might be on a different URL than the PHP files.
+  Set the folder where lookup.php lives (must end with /), before other scripts:
+  <script>window.APP_API_BASE = "https://yoursite.com/italy/";</script>
+-->
+
+<script>
+/** Full URL to PHP in the same folder as this page (fixes subfolders like /italy/). */
+function apiUrl(file) {
+  if (typeof window.APP_API_BASE === "string" && window.APP_API_BASE.length) {
+    return window.APP_API_BASE.replace(/\/?$/, "/") + String(file).replace(/^\//, "");
+  }
+  var href = window.location.href.split("#")[0];
+  return new URL(file, href).href;
+}
+
+function statusClass(s) {
+  var x = String(s || "pending").toLowerCase().trim();
+  if (x === "approved") return "status-approved";
+  if (x === "rejected") return "status-rejected";
+  return "status-pending";
+}
+
+function displayStatusText(s) {
+  var t = String(s || "pending").trim();
+  return t === "" ? "pending" : t;
+}
+
+async function check() {
+  var id = document.getElementById("appId").value.replace(/\s+/g, "");
+  var box = document.getElementById("result");
+  if (!id) {
+    box.innerHTML = "<span style='color:#c00;'>Please enter your Application ID.</span>";
+    return;
+  }
+  box.innerHTML = "Loading…";
+  try {
+    var u = new URL(apiUrl("lookup.php"));
+    u.searchParams.set("id", id);
+    var res = await fetch(u.href, { cache: "no-store", credentials: "same-origin" });
+    if (!res.ok) {
+      box.innerHTML =
+        "<span style='color:#c00;'>Server error (" +
+        res.status +
+        "). URL tried: <code style='word-break:break-all;'>" +
+        escapeHtml(u.href) +
+        "</code><br>Upload <code>lookup.php</code> to the same folder as <code>check.html</code>, or set <code>window.APP_API_BASE</code> (see comment in page source).</span>";
+      return;
+    }
+    var text = await res.text();
+    var trim = text.replace(/^\uFEFF/, "").trim();
+    if (trim.charAt(0) === "<") {
+      box.innerHTML =
+        "<span style='color:#c00;'>The server returned a web page instead of data. PHP is probably not running for <code>lookup.php</code>, or the URL is wrong.<br><br>Tried: <code style='word-break:break-all;'>" +
+        escapeHtml(u.href) +
+        "</code></span>";
+      return;
+    }
+    var data;
+    try {
+      data = JSON.parse(text);
+    } catch (pe) {
+      box.innerHTML =
+        "<span style='color:#c00;'>Invalid JSON from server. Enable PHP on your hosting and keep <code>check.html</code> and <code>lookup.php</code> in the same folder.<br><br>URL: <code style='word-break:break-all;'>" +
+        escapeHtml(u.href) +
+        "</code></span>";
+      return;
+    }
+    if (!data.found) {
+      box.innerHTML =
+        "No application found for this ID. Copy the ID exactly as shown after submit (e.g. <code>ITA123456</code> or <code>APP-…</code>).";
+      return;
+    }
+    var st = displayStatusText(data.status);
+    var nameLine = data.name ? "<p><b>Name:</b> " + escapeHtml(data.name) + "</p>" : "";
+    var passLine = data.passport ? "<p><b>Passport:</b> " + escapeHtml(data.passport) + "</p>" : "";
+    var when = (data.date || "") + (data.time ? " " + data.time : "");
+    var whenLine = when.trim() ? "<p><b>Submitted:</b> " + escapeHtml(when.trim()) + "</p>" : "";
+    box.innerHTML =
+      "<p><b>Application ID:</b> " + escapeHtml(String(data.id)) + "</p>" +
+      "<p style='margin:12px 0 8px 0;'><b>Current status</b></p>" +
+      "<div class=\"status-box " +
+      statusClass(st) +
+      "\">" +
+      escapeHtml(st.toUpperCase()) +
+      "</div>" +
+      nameLine +
+      passLine +
+      whenLine;
+    if (st.toLowerCase() === "approved") {
+      box.innerHTML += "<p style='margin-top:12px;'>Your application has been approved.</p>";
+    }
+  } catch (e) {
+    box.innerHTML =
+      "<span style='color:#c00;'>Network error: could not load <code>lookup.php</code>. " +
+      "Do not open this page as a file (<code>file://</code>); use your website URL. " +
+      "If the form is in a subfolder, add <code>window.APP_API_BASE</code> (see HTML comment above).</span>";
+  }
+}
+
+function escapeHtml(s) {
+  var d = document.createElement("div");
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+document.getElementById("appId").addEventListener("keydown", function (e) {
+  if (e.key === "Enter") check();
+});
+</script>
+
+</body>
+</html>
